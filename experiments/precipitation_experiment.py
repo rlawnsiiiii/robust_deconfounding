@@ -79,7 +79,7 @@ plt.savefig("./climate_freqs_m.pdf", format="pdf")
 plt.clf()
 
 """
-Compares predicted values with true values
+Compares predicted values with true values.
 """
 
 t = np.load("./data/time.npy", allow_pickle=True)
