@@ -9,7 +9,7 @@ import pylab
 from robust_deconfounding.robust_regression import Torrent, BFS
 from robust_deconfounding.decor import DecoR
 from robust_deconfounding.utils import cosine_basis, haarMatrix, get_funcbasis, get_funcbasis_multivariate
-from synthetic_data import BLPDataGenerator, OUDataGenerator, UniformNonlinearDataGenerator, OUReflectedNonlinearDataGenerator
+from synthetic_data import BLPDataGenerator, OUDataGenerator, UniformNonlinearDataGenerator, OUReflectedNonlinearDataGenerator, OUSparseToXDataGenerator
 
 
 def plot_settings():
@@ -118,6 +118,8 @@ def get_data(n: int, process_type: str, basis_type: str, fraction: float, beta: 
         generator =  UniformNonlinearDataGenerator(basis_type=basis_type, beta=beta, noise_var=noise_var)
     elif process_type=="ourre":
         generator= OUReflectedNonlinearDataGenerator(basis_type=basis_type, beta=beta, noise_var=noise_var, )
+    elif process_type=="ou_sparse_to_x":
+        generator = OUSparseToXDataGenerator(basis_type=basis_type, beta=beta, noise_var=noise_var)
     else:
         raise ValueError("process_type not implemented")
 

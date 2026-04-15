@@ -376,7 +376,27 @@ class OUReflectedNonlinearDataGenerator(OUDataGenerator):
         AR_object2 = ArmaProcess(ar2, ma2)
 
         return AR_object1, AR_object2
-    
+
+class OUSparseToXDataGenerator(OUDataGenerator):
+    """
+    Data generator where confounder u is sparse towards x and dense towards y.
+
+    Inherits AR process setup from OUDataGenerator.
+    The relation between x and y is linear.
+    """
+
+    def generate_data(self, n: int, outlier_points: NDArray):
+        AR_object1, AR_object2 = self.get_ar(n)
+        eu, ex, ey = self.get_noise_vars(n, [1, 1, 1])
+
+        u = AR_object1.generate_sample(nsample=2 * n)[n:2 * n].reshape(-1, 1) + eu
+        basis = self.get_basis(n)
+        k_sparse = self.basis_transform(u, outlier_points, basis, n)
+
+        x = AR_object2.generate_sample(nsample=2 * n)[n:2 * n].reshape(-1, 1) + ex + 10 * k_sparse
+
+        y = x @ self.beta + ey + u  # Dense confounding in y
+        return x, y
 
 def functions_nonlinear(x:NDArray, beta:int):
     """"
@@ -401,3 +421,4 @@ def functions_nonlinear(x:NDArray, beta:int):
     else:
         raise ValueError("Function not implemented.")
     return y
+
