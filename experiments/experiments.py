@@ -45,7 +45,7 @@ np.random.seed(SEED)
 random.seed(SEED)
 
 data_args = {
-    "process_type": "blp",      # "ou" | "blp
+    "process_type": "ou",      # "ou" | "blp
     "basis_type": "cosine",     # "cosine" | "haar"
     "fraction": 0.25,
     "beta": np.array([[3.]]),

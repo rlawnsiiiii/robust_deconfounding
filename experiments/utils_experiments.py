@@ -105,7 +105,7 @@ def get_data(n: int, process_type: str, basis_type: str, fraction: float, beta: 
         band (list): Frequency band for concentrated confounding (BLP process only).
 
     Returns:
-        dict: A dictionary containing generated data (x, y), and the basis matrix.
+        dict: A dictionary containing generated data (x, y), basis matrix, and the outlier points.
 
     Raises:
         ValueError: If an invalid process type or basis type is specified.
@@ -139,7 +139,7 @@ def get_data(n: int, process_type: str, basis_type: str, fraction: float, beta: 
     else:
         x, y = generator.generate_data(n=n, outlier_points=outlier_points)
 
-    return {"x": x, "y": y, "basis": basis}
+    return {"x": x, "y": y, "basis": basis, "outlier_points": outlier_points}
 
 
 def plot_results(res: dict, num_data: list, m: int, colors) -> None:
