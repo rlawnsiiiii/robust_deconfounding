@@ -1,14 +1,57 @@
 \section{Experiments}
 
+\begin{frame}{Synthetic Data - Data Generation}
+    Recall:
+    \begin{figure}
+        \centering
+        % The \resizebox command scales the inputted TikZ graphic
+        % Change 0.6 to 0.5 for smaller, or 0.7 for larger
+        \resizebox{0.4\textwidth}{!}{\input{figures/experiments/causal_graph_xyu}} 
+        \caption{Causal Graph of X and Y with hidden confounder U \cite{sippel}}
+    \end{figure}
+
+        We set in our one-dimensional scenario:
+    \begin{itemize}
+        \item $U := \text{AR(1)} + \epsilon_u$ with AR(1) $:=$ Ornstein-Uhlenbeck process and noise $\epsilon_u \sim N(0,1)$
+        \item $U_{sparse} = \text{sparsify($U$, $|G_n| = 0.25 \cdot n$, cosine-basis)}$
+        \item $X := \text{AR(2)} + U_{sparse} + \epsilon_x$ with $\epsilon_x \sim N(0,1)$
+        \item $Y := 3X + 10 \cdot U_{spasre} + \epsilon_y$ with $\epsilon_y \sim N(0,1)$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{}
+        \begin{figure}
+        \centering
+        \includegraphics[width=0.9\textwidth]{figures/experiments/synthetic_data_signals_and_error.png}
+        \caption{\centering Visualization of the true causal signal ($3 \cdot X$), observed data ($Y$), and the isolated sparse confounder ($U_{sparse}$) with $n = 100, G_n = \{k\}$}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Synthetic Data - Experimental Results}
+    \begin{figure} % Wrap everything in ONE figure environment
+        \begin{columns}
+            % Left Column
+            \begin{column}{0.5\textwidth}
+                \centering % Center the image within the column
+                \includegraphics[width=1\linewidth]{figures/experiments/synthetic_experiment_results_ou.png}
+            \end{column}
+            
+            % Right Column
+            \begin{column}{0.5\textwidth}
+                \centering
+                \includegraphics[width=1\linewidth]{figures/experiments/synthetic_experiment_results_band_0-50.png}
+            \end{column}
+        \end{columns}
+        \caption{\centering Comparison of DecoR performance against OLS with $|G_n|=0.25$ and cosine-basis. In the right figure, band B of size 50 is used.}
+    \end{figure}
+\end{frame}
+
+
 \begin{frame}{Application: Earth System Science}
-    \begin{block}{The Setup}
-        \begin{itemize}
-            \item $X_t$: Sea-level pressure (Atmospheric Circulation)
-            \item $Y_t$: Precipitation in the Alps
-            \item $U_t$: External Forcing (Greenhouse Gases)
-        \end{itemize}
-    \end{block}
-    
+    \begin{figure}
+        \centering
+        \includegraphics[width=1\textwidth]{figures/experiments/climate_freqs_accuracy.jpeg}
+    \end{figure}
     \textbf{Findings:}
     DeCoR automatically identifies and filters out the slow, low-frequency components associated with climate change, accurately isolating the short-term "weather" signal $\beta$.
 \end{frame}
