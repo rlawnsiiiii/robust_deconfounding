@@ -1,0 +1,19 @@
+\section{Introduction}
+
+\begin{frame}{Importance of Deconfounding - Earth Science}
+    some time series figure of air pressure, precipitation, greenhouse gas?
+\end{frame}
+
+\begin{frame}[shrink=10]{Importance of Decounfounding - Earth Science}
+    \begin{figure}
+        \centering
+        % This "pastes" the content of your graph file here
+        \input{figures/introduction/causal_graph_xyu} 
+        \caption{Causal Graph of Greenhouse Gas Confounding \cite{sippel}}
+    \end{figure}
+\begin{itemize}
+    \item \textbf{Goal:} Estimating $\beta$ (effect of $X$ to $Y$)
+    \item \textbf{Problem:} Biased estimation of $\beta$ (via standard OLS) without considering hidden confounder $U$ 
+    \item \textbf{Idea:} Removal of confounder $U$ seems important for accurate estimation of $\beta$ 
+\end{itemize}
+\end{frame}

@@ -1,0 +1,115 @@
+\section{Theoretical Guarantees}
+
+\begin{frame}[shrink=10]{Setting the Stage for Proofs for Torrent}
+    \begin{block}{Key Assumptions}
+        \begin{enumerate}
+            \item \textbf{Setting 2:} Let $n \geq d$. We observe $X \in \mathbb{R}^{n \times d}$ and $Y \in \mathbb{R}^n$ defined by:
+        \begin{equation*}
+            Y := X\beta + \epsilon + o
+        \end{equation*}
+            where $\epsilon \in \mathbb{R}^n$ is noise and $o \in \mathbb{R}^n$ are sparse outliers supported on $G_n$ (i.e., $o_i = 0$ for $i \notin G_n$). We call $G_n^c$ the \textbf{inliers}.
+            \item \textbf{Bounded Outliers $G_n$:} \# confounded frequencies $|G_n| \le c_n$.
+            \item \textbf{Mistakes-Stability-Ratio:} As $n \to \infty$, it holds with high probability that:
+            $$ \eta := \max_{S \text{ s.t. } |S|=n-c_n} \frac{||X_{V(S)}||_2}{\sqrt{\lambda_{\min}(X_S^\top X_S)}} < \frac{1}{\sqrt{2}} $$
+            where $S \subseteq \{1, ..., n\}$ and $V(S) = (S \cup G_n^c) \setminus (G_n^c \cap S)$ is the symmetric difference between $S$ and $G_n^c$.
+        \end{enumerate}
+    \end{block}
+
+    \textbf{Intuitions:}
+    \begin{itemize}
+        \item Should $\eta$ better be nearly $0$ or close to our upper bound?
+        \item What happens if $X_S$ is singular for some $S$?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Proofs - Torrent (deterministic)}
+    \begin{block}{Guarantee of Torrent (Theorem 3)}
+    Let $S_t$ be the final estimated subset of Torrent on data $X$, $Y$ using threshold parameter $a_n := n - c_n$. Then
+        \begin{equation*}
+        \begin{aligned}
+        \|\hat{\beta}_{\text{Tor}}^{n,a_n} - \beta\|_2 &\leq \text{Err}_{\text{OLS}} \\
+        &\quad + \frac{\sqrt{2}\|X_{V(S_t)}\|_2 \cdot \text{Err}_{\text{OLS}} + \sqrt{2}\|\epsilon_{V(S_t)}\|_2}{\sqrt{\lambda_{\min}(X_{S_t}^\top X_{S_t})}(1 - \sqrt{2}\eta)}.
+        \end{aligned}
+        \end{equation*}
+        
+        \small with $\text{Err}_{\text{OLS}} = \|(X_{S_t}^\top X_{S_t})^{-1} X_{S_t}^\top \epsilon_{S_t}\|_2$ \textit{being the baseline error of the clean subset.}
+    \end{block}
+    \textbf{Intuitions:}
+    \begin{itemize}
+        \item What happens in case of no outliers at all?
+        \item What happens if $\eta \approx \frac{1}{\sqrt{2}}$ or $X_{S_t}$ is singular?
+        \item Note the multiplicative/additive effects of outliers in X and Y
+    \end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%full proof%%%%%%%%%%%%%%%%%%%%%%%%
+\input{sections/proof_theorem_3}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%full proof%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[shrink=15]{\normalsize Proofs - Torrent (probabilistic)}
+    % Adding the definition right before the block for context
+    Define the square root of minimum eigenvalue of all possible clean subsets as
+    \begin{equation*}
+        \lambda_{a_n}(X) := \min_{S \subseteq \{1,\dots,n\} \text{ s.t. } |S|=a_n} \sqrt{\lambda_{\min}(X_S^\top X_S)}
+    \end{equation*}
+    
+    \begin{exampleblock}{Guarantee of Torrent with sub-Gaussian noise (Corollary 4)}
+        Let $\epsilon$ be i.i.d. zero-mean sub-Gaussian noise with variance proxy $\sigma^2$ and assume $c_n < n/2$. Then, there exists a constant $K > 0$ s.t. $\forall$ $\delta > 0$ with probability $\geq 1 - \delta$:
+
+        \begin{equation*}
+        \begin{aligned}
+        \|\hat{\beta}_{\text{Tor}}^{n,a_n} - \beta\|_2 &\leq \frac{\sigma}{\lambda_{a_n}(X)} \left(1 + \frac{1}{1 - \sqrt{2}\eta}\right) \left(\sqrt{d} + \sqrt{2c_n} L_{n,\delta} \right) \\
+        &\quad + \frac{2\sigma\sqrt{c_n}\left(1 + L_{n,\delta}\right)}{\lambda_{a_n}(X)(1 - \sqrt{2}\eta)}.
+        \end{aligned}
+        \end{equation*}
+               \small with $L_{n,\delta} := \sqrt{K \log \left( 2en / c_n\delta \right)}$ representing the logarithmic search penalty.
+    \end{exampleblock}
+    
+    \textbf{Insights:}
+    \begin{itemize}
+        \item What happens if $c_n = 0$? Compare it to standard OLS.
+        \item If the rows of $X$ are i.i.d. standard Gaussian random vectors (i.e. $\lambda_{a_n}(X) \in\Omega_{\mathbb{P}}(\sqrt{n})$ \cite{bhatia2015robustregressionhardthresholding}) and $c_n \in o(n/\log(n))$, then $\hat{\beta}_{\text{Tor}}^{n,a_n}$ is consistent.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[shrink=15]{\normalsize Proofs - DecoR-Tor}
+    \begin{block}{Convergence properties of \texttt{DecoR-Tor} (Theorem 6)}
+        Let $c_n$ be a known sequence of non-negative natural numbers such that $|G_n| \leq c_n$ and let Assumption 2 in \cite{bhatia2015robustregressionhardthresholding} be satisfied. Assume that for all $\delta > 0$ there exists $\bar{n} \in \mathbb{N}$ such that for all $n \geq \bar{n}$ it holds that
+        \begin{equation*}
+            \mathbb{P}\left[ \max_{S \subseteq \{1,\dots,n\} \text{ s.t. } |S|=n-c_n} \frac{\|(X_{\phi}^n)_{V(S)}\|_2}{\sqrt{\lambda_{\min}\left((X_{\phi}^n)_S^\top (X_{\phi}^n)_S\right)}} < \frac{1}{\sqrt{2}} \right] \geq 1 - \delta.
+        \end{equation*}
+        If \texttt{DecoR} is executed with \texttt{Torrent} and the sequence of threshold parameters $a_n = n - c_n$, then
+        \begin{equation*}
+            \|\hat{\beta}_{\text{DecoR}}^{\phi,n} - \beta\|_2 \in \mathcal{O}_{\mathbb{P}}\left( \sigma \sqrt{\frac{c_n \log(n/c_n)}{n}} \right).
+        \end{equation*}
+    \end{block}
+    \textbf{Insights:}
+    \begin{itemize}
+        \item $\hat{\beta}_{\text{DecoR}}^{\phi,n}$ is a consistent estimator of $\beta$, if $\sigma=0$ or $c_n \in o(n)$
+        \item if noise is non-zero and $c_n$ is asymptotically proportional to $n$, then the estimation error is bounded by $\sigma$, up to constant factors.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[shrink=10]{\normalsize Proofs - DecoR-Tor}
+    \begin{block}{Convergence properties of \texttt{DecoR-Tor} (Theorem 6) - shortened}
+        \begin{equation*}
+            \|\hat{\beta}_{\text{DecoR}}^{\phi,n} - \beta\|_2 \in \mathcal{O}_{\mathbb{P}}\left( \sigma \sqrt{\frac{c_n \log(n/c_n)}{n}} \right).
+        \end{equation*}
+    \end{block}
+    \textbf{Proof ideas:}
+    \begin{itemize}
+        \item By some assumptions, note that $\sqrt{\lambda_{\min}\left((X_{\phi}^n)_S^\top (X_{\phi}^n)_S\right)} \geq c^\prime$ with high probability.
+        \item each component of $\eta^n_\phi = \{T^{\phi, n}_k(\eta)\}_{k\leq n}=\frac{1}{n}\sum_{l=1}^n(\eta_{Tl/n})_k\cdot \phi_k(Tl/n)$ has (by factor $n$) reduced variance $\bar\sigma^2 = \sigma^2/n$
+        \item Use \textbf{\textcolor{darkgreen}{Corollary 4}} and derive Big-$\mathcal{O}$ result: 
+            \begin{exampleblock}{}
+                \begin{equation*}
+                \begin{aligned}
+                \|\hat{\beta}_{\text{Tor}}^{n,a_n} - \beta\|_2 
+                &\leq \frac{\sigma}{\lambda_{a_n}(X)} \left(1 + \frac{1}{1 - \sqrt{2}\eta}\right)
+                \left(\sqrt{d} + \sqrt{2c_nK \log \left( 2en/c_n\delta \right)} \right) \\
+                &\quad + \frac{2\sigma\sqrt{c_n}\left(1 + \sqrt{K \log \left( 2en/c_n\delta \right)}\right)}{\lambda_{a_n}(X)(1 - \sqrt{2}\eta)}.
+                \end{aligned}
+                \end{equation*}
+            \end{exampleblock}
+    \end{itemize}
+\end{frame}

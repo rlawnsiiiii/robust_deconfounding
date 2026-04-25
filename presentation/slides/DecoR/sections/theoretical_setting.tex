@@ -1,0 +1,107 @@
+\section{Theoretical Setting}
+
+\begin{frame}{The Underlying Model}
+    \begin{block}{Setting 1: Data Generating Process}
+        Let $T \in \mathbb{R}_{>0}$ be a fixed time horizon and $d \in \mathbb{N}$. We consider the relationship:
+        \begin{equation}
+            Y_t = X_t^\top \beta + U_t + \eta_t, \quad t \in [0,T]
+        \end{equation}
+    \end{block}
+
+    \textbf{Components:}
+    \begin{itemize}
+        \item \textbf{$X_t \in \mathbb{R}^d$}: Observed multivariate predictors.
+        \item \textbf{$U_t \in \mathbb{R}$}: Unobserved hidden confounder.
+        \item \textbf{$\eta_t$}: i.i.d. centered Gaussian noise.
+        \item \textbf{$\beta \in \mathbb{R}^d$}: True causal effect (estimand).
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Assumptions and Sparsity}
+\begin{block}{Definition 1: $(\phi, G)$-sparse process [cite: 164]}
+        A process $U$ is $(\phi, G)$-sparse with respect to basis $\phi$ if for a set $G \subseteq \mathbb{N}$:
+        $$ \langle U, \phi_k \rangle_{L^2} = \int_0^T U_t \phi_k(t) dt = 0 \quad \text{for all } k \notin G \text{ almost surely} $$
+    \end{block}
+
+    \begin{alertblock}{Assumption 1: Sparse Confounding }
+        The set $G$ is "small," meaning the hidden confounder only affects a few basis components (frequencies).
+    \end{alertblock}
+
+    \textbf{Implication:}
+    By transforming the data, we can isolate the "clean" frequencies $G^c$ where the confounder disappears.
+\end{frame}
+
+\begin{frame}[fragile]{Example: Sparse $U$}
+    \begin{lstlisting}[language=Python]
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.fft import dct
+
+n = 500
+T = 1.0  # Time horizon
+t = np.linspace(0, T, n, endpoint=False)
+
+# some small frequency set
+k1, k2 = 2, 5
+
+U_time = 2.0 * np.cos(2 * np.pi * k1 * t / T) + 1.0 * np.cos(2 * np.pi * k2 * t / T)
+
+U_freq = dct(U_time, type=2, norm='ortho')
+k_indices = np.arange(len(U_freq)) 
+magnitude = np.abs(U_freq) / (n / 2) # Normalize
+
+# 'magnitude` is zero everywhere except 
+# exactly at the integer indices k=2 and k=5
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Example: Sparse $U$}
+    \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{figures/theoretical_setting/sparse_U_example.pdf}
+        \caption{A sparse confounder $U_t$ in the time domain (left) and frequency domain (right). The non-zero spikes represent the "small" confounded set $G$.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Frequency Domain Transformation}
+    \begin{block}{Transformation $T_k^{\phi,n}$}
+        Define, for all $k \le n$, the function $T_k^{\phi,n} : \mathcal{S} \to \mathcal{C}$ by:
+        $$T_k^{\phi,n}(V) := \begin{bmatrix} 
+        \frac{1}{n} \sum_{l=1}^n (V_{Tl/n})_1 \phi_k(Tl/n) \\ 
+        \vdots \\ 
+        \frac{1}{n} \sum_{l=1}^n (V_{Tl/n})_d \phi_k(Tl/n) 
+        \end{bmatrix}$$
+    \end{block}
+    \begin{itemize}
+        \item \textbf{\textcolor{blue}{$k \leq n$:}} \# needed ind. basis functions $\leq$ n (\# data points)
+        \item \textbf{\textcolor{blue}{$\sum_t V_{t} \phi_k(t) \cdot (T/n)$:}} discrete approximation of $\int_0^T V_t \phi_k(t) dt$ with time step $\Delta t = T/n$, $T = 1$
+        \item \textbf{\textcolor{blue}{DCT:}} for the cosine basis, this corresponds to Discrete Cosine Transform
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Frequency Domain Transformation - Outlier Problem}
+    \begin{block}{The Deconfounded View}
+        Using the linearity of $T_k^{\phi,n}$, it holds for all $k \le n$:
+        \begin{equation}
+            \begin{aligned}
+                T_k^{\phi,n}(Y) &= T_k^{\phi,n}(X)^\top \beta + T_k^{\phi,n}(U) + T_k^{\phi,n}(\eta) \\
+                &\overset{\text{a.s.}}{=} \begin{cases} 
+                T_k^{\phi,n}(X)^\top \beta + T_k^{\phi,n}(U) + T_k^{\phi,n}(\eta) & \text{if } k \in G, \\ 
+                T_k^{\phi,n}(X)^\top \beta + T_k^{\phi,n}(\eta) & \text{if } k \notin G. 
+                \end{cases}
+            \end{aligned}
+        \end{equation}
+    \end{block}
+
+    \begin{exampleblock}{Remark: The Outlier Problem}
+        If $k \in G$, $T_k^{\phi,n}(U)$ acts as an \textbf{adversarial outlier}. If $k \notin G$, the confounder term is zero, leaving an unconfounded linear relationship.
+    \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Outlier Problem}
+    \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{figures/theoretical_setting/outlier_problem_visualization.pdf}
+        \caption{\textbf{Left:} In the time domain, the hidden confounder $U_t$ corrupts $X_t$ and the estimation of $\beta$ via OLS. \textbf{Right:} Applying DCT $T_k^{\phi,n}$ isolates the confounder into the sparse set $G$. The goal becomes identifying these isolated outliers and estimating the unconfounded relationship $\beta$ (via Robust Regression).}
+    \end{figure}
+\end{frame}

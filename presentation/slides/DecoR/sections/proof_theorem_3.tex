@@ -1,0 +1,108 @@
+\begin{frame}[shrink=5]{\normal Detailed Proof - Theorem 3}
+Assume $X_{S_{t-1}}^\top X_{S_{t-1}}$ is invertible. 
+    \begin{block}{1. Optimality Bound (Eq. 27)}
+        We use the optimality of the model $\hat{\beta}_{\text{Tor}}^t$ on the active set $S_{t-1}$:
+        \vspace{-0.3cm}
+        \begin{align*}
+        \|\hat{\beta}_{\text{Tor}}^t - \beta\|_2 &= \left\| (X_{S_{t-1}}^\top X_{S_{t-1}})^{-1} (X_{S_{t-1}}^\top \epsilon_{S_{t-1}} + X_{S_{t-1}}^\top o_{S_{t-1}}) \right\|_2 \\
+        &\leq \left\| (X_{S_{t-1}}^\top X_{S_{t-1}})^{-1} X_{S_{t-1}}^\top \epsilon_{S_{t-1}} \right\|_2 \\
+        &\quad + \left\| (X_{S_{t-1}}^\top X_{S_{t-1}})^{-1} X_{S_{t-1}}^\top \right\|_2 \|o_{S_{t-1}}\|_2
+        \end{align*}
+    \end{block}
+    
+    \begin{block}{2. Hard Thresholding Guarantee (Eq. 28)}
+        Following the HT-step and using relation $|G_n| \leq c_n \implies |G_n^c| \geq n - c_n$:
+        \vspace{-0.3cm}
+        \begin{align*}
+        \|X_{S_t} (\beta - \hat{\beta}_{\text{Tor}}^t) + \epsilon_{S_t} + o_{S_t}\|_2^2 &= \|Y_{S_t} - X_{S_t} \hat{\beta}_{\text{Tor}}^t\|_2^2 \\
+        &\leq \|Y_{G_n^c} - X_{G_n^c} \hat{\beta}_{\text{Tor}}^t\|_2^2 \\
+        &= \|X_{G_n^c} (\beta - \hat{\beta}_{\text{Tor}}^t) + \epsilon_{G_n^c}\|_2^2
+        \end{align*}
+    \end{block}
+\end{frame}
+
+\begin{frame}[shrink=10]
+    \textbf{Bounding the Outliers $\|o_{S_t}\|_2$:}
+    
+    Let $H_t := S_t \setminus G_n^c$ and $M_t := G_n^c \setminus S_t$. We know from above:
+    
+    \begin{block}{}
+    \vspace{-0.4cm}
+    \begin{align*}
+        \|X_{H_t} (\beta - \hat{\beta}_{\text{Tor}}^t) + \epsilon_{H_t} + o_{H_t}\|_2
+        \leq
+        \|X_{M_t} (\beta - \hat{\beta}_{\text{Tor}}^t) + \epsilon_{M_t}\|_2
+    \end{align*}
+    \end{block}
+
+    Let $H_t \cup M_t = V(S_t) =: V_t$. We can then expand by triangle inequality:
+    
+    \begin{block}{3. Outlier Expansion (Eq. 29)}
+        \vspace{-0.4cm}
+        \begin{align*}
+        \|o_{S_t}\|_2
+        &\leq \|X_{M_t} (\beta - \hat{\beta}_{\text{Tor}}^t)\|_2
+        + \|X_{H_t} (\beta - \hat{\beta}_{\text{Tor}}^t)\|_2
+        + \|\epsilon_{H_t}\|_2
+        + \|\epsilon_{M_t}\|_2 \\[0.2cm]
+        &\leq \sqrt{2}\,\|X_{V_t}\|_{2}\,\|\beta - \hat{\beta}_{\text{Tor}}^t\|_2
+        + \sqrt{2}\,\|\epsilon_{V_t}\|_2 \\[0.2cm]
+        &\leq \sqrt{2}\,\|X_{V_t}\|_{2}
+        \Big(
+        \left\| (X_{S_{t-1}}^\top X_{S_{t-1}})^{-1} X_{S_{t-1}}^\top \epsilon_{S_{t-1}} \right\|_2 \\
+        &\qquad\qquad
+        + \left\| (X_{S_{t-1}}^\top X_{S_{t-1}})^{-1} X_{S_{t-1}}^\top \right\|_{2\to 2}\,
+        \|o_{S_{t-1}}\|_2
+        \Big)
+        + \sqrt{2}\,\|\epsilon_{V_t}\|_2
+        \end{align*}
+    \end{block}
+
+    \begin{itemize}
+        \item Add and subtract: {\small
+            \(\displaystyle
+            \|o_{S_t}\|_2
+            =
+            \big\|
+            (X_{H_t}(\beta-\hat{\beta}_{\text{Tor}}^t)+\epsilon_{H_t}+o_{H_t})
+            -
+            (X_{H_t}(\beta-\hat{\beta}_{\text{Tor}}^t)+\epsilon_{H_t})
+            \big\|_2
+            \)
+            }
+        \item Apply $(|a|+|b|)^2 \leq 2(a^2+b^2)$ twice to merge $H_t$ and $M_t$ into $V_t$:
+        \begin{itemize}
+            \item For the noise: {\small $(\|\epsilon_{H_t}\|_2, \|\epsilon_{M_t}\|_2) \to \sqrt{2}\|\epsilon_{V_t}\|_2$}
+            \item For the signal: {\small $(\|X_{M_t} (\beta - \hat{\beta}_{\text{Tor}}^t)\|_2, \|X_{H_t} (\beta - \hat{\beta}_{\text{Tor}}^t)\|_2)$ \to \sqrt{2}$\|X_{V_t} (\beta - \hat{\beta}_{\text{Tor}}^t)\|_2$}
+        \end{itemize}
+        \item Observe $\|o_{H_t}\|_2=\|o_{S_t}\|_2$, recalling $o_i = 0$ for $i \notin G_n$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[shrink=7.5]
+    Let $t$ be the final iteration of Torrent, meaning $S_t = S_{t-1}$. 
+    
+    By assumption:
+    \vspace{-0.4cm}
+    \begin{equation*}
+        \eta = \max_{S \subseteq \{1,\dots,n\} \text{ s.t. } |S|=a_n} \frac{\|X_{V(S)}\|_2}{\sqrt{\lambda_{\min}(X_S^\top X_S)}} = \max_S \|X_{V(S)}\|_2 \|(X_S^\top X_S)^{-1} X_S^\top\|_2 < \frac{1}{\sqrt{2}}
+    \end{equation*}
+    \vspace{-0.4cm}
+    {\small
+    \begin{itemize}
+        \item Recall the matrix norm property: $\|A\|_2 = \sqrt{\lambda_{\max}(A^\top A)} = \sqrt{\lambda_{\max}(AA^\top)}$. 
+        \item Set $A := (X_S^\top X_S)^{-1} X_S^\top$ and observe $AA^\top = (X_S^\top X_S )^{-1}$ 
+        \item {\scriptsize $\|(X_S^\top X_S)^{-1} X_S^\top\|_2 = ||A||_2 = \sqrt{\lambda_{\max}(AA^\top)} = \sqrt{\lambda_{\max}((X_s^\top X_s)^{-1})} = 1/\sqrt{\lambda_{\min}((X_s^\top X_s))}$}
+    \end{itemize}
+    }
+
+    \begin{block}{4. Applying $\eta$ to isolate $o_{S_t}$ (Eq. 30)}
+        Distributing terms in Eq. 29 and substituting the $\eta$ bound:
+        \vspace{-0.4cm}
+        \begin{align*}
+        \|o_{S_t}\|_2 &\leq \underbrace{\sqrt{2}\|X_{V_t}\|_2 \left\|\left(X_{S_{t}}^\top X_{S_{t}}\right)^{-1} X_{S_{t}}^\top \right\|_2}_{\leq \sqrt{2}\eta} \|o_{S_{t}}\|_2 \\
+        &\quad + \sqrt{2}\|X_{V_t}\|_2 \left\|\left(X_{S_{t}}^\top X_{S_{t}}\right)^{-1} X_{S_{t}}^\top \epsilon_{S_{t}} \right\|_2 + \sqrt{2}\|\epsilon_{V_t}\|_2 \\[1ex]
+        &\implies \|o_{S_t}\|_2 \leq \frac{\sqrt{2}\|X_{V_t}\|_2 \left\| (X_{S_t}^\top X_{S_t})^{-1} X_{S_t}^\top \epsilon_{S_t} \right\|_2 + \sqrt{2}\|\epsilon_{V_t}\|_2}{1 - \sqrt{2}\eta}.
+        \end{align*}
+    \end{block}
+\end{frame}

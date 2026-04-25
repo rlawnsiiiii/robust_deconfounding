@@ -1,0 +1,16 @@
+\begin{tikzpicture}[
+    % Reduced distances for Beamer
+    node distance=1.5cm and 2.0cm, 
+    observed/.style={circle, draw, thick, minimum size=1.5cm, font=\small, align=center},
+    hidden/.style={rectangle, draw, thick, minimum size=1.5cm, font=\small, align=center},
+    arrow/.style={-Stealth, thick}
+]
+    % Nodes (U, X, Y) represent the confounding relationship in ESS [cite: 2227, 2353]
+    \node[hidden] (U) {\textbf{Greenhouse Gas} \\ ($U_t$)};
+    \node[observed, below left=of U] (X) {\textbf{\footnotesize Atmospheric} \\ \textbf{\footnotesize Circulation} \\ ($X_t$)};
+    \node[observed, below right=of U] (Y) {\textbf{Precipitation} \\ ($Y_t$)};
+
+    \draw[arrow] (U) -- (X);
+    \draw[arrow, dashed] (U) -- node[midway, right, xshift=2pt, font=\scriptsize] {sparse} (Y);
+    \draw[arrow] (X) -- node[midway, above, font=\small] {$\beta$} (Y);
+\end{tikzpicture}

@@ -1,0 +1,29 @@
+
+%%%%%%%%%%%%%%Packages%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{beamer}
+\input{sections/preamble}
+\input{sections/title}
+\begin{document}
+
+%%%%%%%%%%%%%%%%End_of_Preamble%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{\titlepage}
+
+\input{sections/introduction}
+\input{sections/theoretical_setting}
+\input{sections/methodology}
+\input{sections/theoretical_guarantees}
+\input{sections/experiments}
+%\input{sections/extension}
+\input{sections/conclusion}
+%\input{sections/future_work}
+
+
+%%%%%%%%%%%%%%%%References%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[allowframebreaks]{References}
+    \bibliographystyle{plain} % Or 'plain', 'apalike'
+    \bibliography{references}   % Points to references.bib
+\end{frame}
+
+\end{document}
