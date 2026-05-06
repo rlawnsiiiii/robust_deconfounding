@@ -7,18 +7,106 @@
             Y_t = X_t^\top \beta + U_t + \eta_t, \quad t \in [0,T]
         \end{equation}
     \end{block}
-
-    \textbf{Components:}
+    {\small \textbf{Components:}
     \begin{itemize}
-        \item \textbf{$X_t \in \mathbb{R}^d$}: Observed multivariate predictors.
-        \item \textbf{$U_t \in \mathbb{R}$}: Unobserved hidden confounder.
-        \item \textbf{$\eta_t$}: i.i.d. centered Gaussian noise.
+        \item \textbf{$X_t \in \mathbb{R}^d$}: a (multivariate) stochastic process.
+        \item \textbf{$U_t \in \mathbb{R}$}: a (univariate) stochastic process.
+        \item \textbf{$\eta_t$}: i.i.d. centered Gaussian noise independent of $X$.
         \item \textbf{$\beta \in \mathbb{R}^d$}: True causal effect (estimand).
+    \end{itemize}
+    \textbf{Observations:}
+    Given a fixed $n \in \mathbb{N},$ we assume that we observe with $\Delta t = T/n$:
+    \begin{itemize}
+        \item $X^n := (X_{\Delta t}, X_{2\Delta t}, ..., X_{n\Delta t})^\top$
+        \item $Y^n := (Y_{\Delta t}, Y_{2 \Delta t}, ..., Y_{n \Delta t})^\top$
+    \end{itemize}}
+
+    \textbf{In short:} $X^n$ and $Y^n$ are vectors of discrete (equidistant) $n$ observations, $U_t$ is a hidden confounder.
+\end{frame}
+
+\begin{frame}{Frequency Domain Transformation}
+    \textbf{Recall:}
+    Only discrete $X^n := (X_{\Delta t}, X_{2\Delta t}, ..., X_{n\Delta t})$ in time domain is given, not the continuous $X_t$ with $t \in [0, T]$
+    \begin{block}{Basis Expansions}
+        Given only $X^n$ ($n$ discrete observations), "reconstruct" the original process $X_t$ as a linear combination of basis functions:
+        \begin{equation}
+            \hat X_{i \Delta t} = \sum_{k = 1}^{K}\hat c_k \cdot \phi_k(i\Delta t)
+        \end{equation}
+    \end{block}
+    \begin{itemize}
+        \item We use same basis functions to "reconstruct" $Y^n$ (and $U^n$)
+        \item Here, we will mainly use the (ordered) \textbf{orthonormal} cosine basis.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Frequency Domain Transformation - 1D Example}
+        \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{figures/theoretical_setting/frequency_domain_transformation_example.png}
+        \caption{\small{Given the discrete sample points in time domain, continuous $X_t$ is "reconstructed" by fitting the coefficients of the basis functions.}}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Frequency Domain Transformation (Cosine Basis)}
+    \begin{figure}
+        \centering
+        
+        \begin{subfigure}{0.5\textwidth}
+            \centering
+            % I removed the 0.9 scale since they have a whole slide now!
+            \includegraphics[width=\linewidth]{figures/theoretical_setting/continuous_cosine_basis_functions.png}
+        \end{subfigure}%
+        \hfill
+        \begin{subfigure}{0.5\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{figures/theoretical_setting/orthogonality_cosine_basis_functions.png}
+        
+        \end{subfigure}
+        
+        % You now have room for a nice, descriptive overall caption
+        \vspace{0.5cm} % Adds a little breathing room above the main caption
+        \caption{\textbf{Left:} Cosine Basis Functions.\\ \textbf{Right:} Orthogonality of Cosine Basis Functions; Inner product between basis functions of different frequencies results in zero.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Frequency Domain Transformation (Cont.)}
+    \begin{block}{Estimating coefficients $c$}
+        let $\Phi$ be the $n \times K$ matrix with entries $\Phi_{i,k} = \phi_k(i\Delta t)$ and $K =$ number of basis functions. We want to estimate the vector of coefficients $c = (c_1, ..., c_K)$. We consider the sum of squared errors:
+        \begin{equation}
+            \text{SSE}_X = \sum_{i=1}^n (X_{i\Delta t} - \hat X_{i\Delta t}) = (X^n - \Phi c)^\top (X^n - \Phi c)
+        \end{equation}
+        The least squares solution gives $\hat c = (\Phi ^\top \Phi)^{-1}\Phi^\top X^n$. \\
+        For \textbf{orthonormal} basis, it holds that $\Phi^\top \Phi \approx nI_K$, which gives $\hat c \approx \frac{1}{n}\Phi^\top X^n$.
+    \end{block}
+    {\small
+    Above, we used:
+    \vspace{-0.3cm}
+    \begin{itemize}
+        \item For orthonormal basis, it holds: $\int_0^T\phi_k(t)\phi_m(t)dt = \begin{cases}1 & \text{if } k=m \\0 & \text{if } k \ne m \end{cases}$
+        \item For $k = m$: Sum approximation yields: $\frac{1}{n}\sum_{i=1}^{n}\phi_k(i\Delta t)^2 \approx 1$.
+    \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}{Frequency Domain Transformation}
+Previous derivation: $\hat c \approx \frac{1}{n}\Phi^\top X^n$.
+    \begin{block}{Transformation $T_k^{\phi,n}$}
+        Let $\mathcal{D}$ be the set of n $\mathbb{R}^d$-valued discrete samples of stochastic processes (see $X^n$) and $\mathcal{C}$ the set of random variables on $\mathbb{R}^d$. Let timestamp $\Delta t = T/n$.
+        Define, for all $k \le n$, the function $T_k^{\phi,n} : \mathcal{D} \to \mathcal{C}$ by:
+        $$T_k^{\phi,n}(V) := \begin{bmatrix} 
+        \frac{1}{n} \sum_{i=1}^n (V_{i\Delta t})_1 \phi_k(i\Delta t) \\ 
+        \vdots \\ 
+        \frac{1}{n} \sum_{i=1}^n (V_{i\Delta t})_d \phi_k(i\Delta t) 
+        \end{bmatrix}$$
+    \end{block}
+    \begin{itemize}
+        \item \textbf{\textcolor{blue}{$k \leq n$:}} Integer indices (Frequencies) of (ordered) orthonormal basis functions $\leq$ n (\# data points)
+        \item \textbf{\textcolor{blue}{DCT:}} for the cosine basis, this corresponds to Discrete Cosine Transform
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Assumptions and Sparsity}
-\begin{block}{Definition 1: $(\phi, G)$-sparse process [cite: 164]}
+\begin{block}{Definition 1: $(\phi, G)$-sparse process}
         A process $U$ is $(\phi, G)$-sparse with respect to basis $\phi$ if for a set $G \subseteq \mathbb{N}$:
         $$ \langle U, \phi_k \rangle_{L^2} = \int_0^T U_t \phi_k(t) dt = 0 \quad \text{for all } k \notin G \text{ almost surely} $$
     \end{block}
@@ -28,7 +116,10 @@
     \end{alertblock}
 
     \textbf{Implication:}
-    By transforming the data, we can isolate the "clean" frequencies $G^c$ where the confounder disappears.
+    \begin{itemize}
+        \item From before: $\int_0^T U_t \phi_k(t) dt \approx \frac{1}{n}\sum_{i=1}^n(U_{i\Delta t})\phi_k(i\Delta t) = T_k^{\phi,n}(U)$
+        \item By transforming the data, we can isolate the ``clean'' frequencies $G^c$ where the confounder disappears.
+    \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]{Example: Sparse $U$}
@@ -63,23 +154,24 @@ magnitude = np.abs(U_freq) / (n / 2) # Normalize
     \end{figure}
 \end{frame}
 
-\begin{frame}{Frequency Domain Transformation}
-    \begin{block}{Transformation $T_k^{\phi,n}$}
-        Define, for all $k \le n$, the function $T_k^{\phi,n} : \mathcal{S} \to \mathcal{C}$ by:
-        $$T_k^{\phi,n}(V) := \begin{bmatrix} 
-        \frac{1}{n} \sum_{l=1}^n (V_{Tl/n})_1 \phi_k(Tl/n) \\ 
-        \vdots \\ 
-        \frac{1}{n} \sum_{l=1}^n (V_{Tl/n})_d \phi_k(Tl/n) 
-        \end{bmatrix}$$
-    \end{block}
-    \begin{itemize}
-        \item \textbf{\textcolor{blue}{$k \leq n$:}} \# needed ind. basis functions $\leq$ n (\# data points)
-        \item \textbf{\textcolor{blue}{$\sum_t V_{t} \phi_k(t) \cdot (T/n)$:}} discrete approximation of $\int_0^T V_t \phi_k(t) dt$ with time step $\Delta t = T/n$, $T = 1$
-        \item \textbf{\textcolor{blue}{DCT:}} for the cosine basis, this corresponds to Discrete Cosine Transform
-    \end{itemize}
-\end{frame}
+
 
 \begin{frame}{Frequency Domain Transformation - Outlier Problem}
+
+    {\scriptsize from before:}
+    {\small
+    \[
+    T_k^{\phi,n}(Y) =
+    \begin{bmatrix}
+    \frac{1}{n}\sum_{i=1}^n (Y_{i\Delta t})_1 \phi_k(i\Delta t)\\
+    \vdots\\
+    \frac{1}{n}\sum_{i=1}^n (Y_{i\Delta t})_d \phi_k(i\Delta t)
+    \end{bmatrix}
+    \qquad
+    \text{and}\qquad
+    Y_t = X_t^\top \beta + U_t + \eta_t,\; t\in[0,T].
+    \]
+    }
     \begin{block}{The Deconfounded View}
         Using the linearity of $T_k^{\phi,n}$, it holds for all $k \le n$:
         \begin{equation}

@@ -38,40 +38,12 @@
     \begin{itemize}
         \item What happens in case of no outliers at all?
         \item What happens if $\eta \approx \frac{1}{\sqrt{2}}$ or $X_{S_t}$ is singular?
-        \item Note the multiplicative/additive effects of outliers in X and Y
     \end{itemize}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%full proof%%%%%%%%%%%%%%%%%%%%%%%%
 \input{sections/proof_theorem_3}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%full proof%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}[shrink=15]{\normalsize Proofs - Torrent (probabilistic)}
-    % Adding the definition right before the block for context
-    Define the square root of minimum eigenvalue of all possible clean subsets as
-    \begin{equation*}
-        \lambda_{a_n}(X) := \min_{S \subseteq \{1,\dots,n\} \text{ s.t. } |S|=a_n} \sqrt{\lambda_{\min}(X_S^\top X_S)}
-    \end{equation*}
-    
-    \begin{exampleblock}{Guarantee of Torrent with sub-Gaussian noise (Corollary 4)}
-        Let $\epsilon$ be i.i.d. zero-mean sub-Gaussian noise with variance proxy $\sigma^2$ and assume $c_n < n/2$. Then, there exists a constant $K > 0$ s.t. $\forall$ $\delta > 0$ with probability $\geq 1 - \delta$:
-
-        \begin{equation*}
-        \begin{aligned}
-        \|\hat{\beta}_{\text{Tor}}^{n,a_n} - \beta\|_2 &\leq \frac{\sigma}{\lambda_{a_n}(X)} \left(1 + \frac{1}{1 - \sqrt{2}\eta}\right) \left(\sqrt{d} + \sqrt{2c_n} L_{n,\delta} \right) \\
-        &\quad + \frac{2\sigma\sqrt{c_n}\left(1 + L_{n,\delta}\right)}{\lambda_{a_n}(X)(1 - \sqrt{2}\eta)}.
-        \end{aligned}
-        \end{equation*}
-               \small with $L_{n,\delta} := \sqrt{K \log \left( 2en / c_n\delta \right)}$ representing the logarithmic search penalty.
-    \end{exampleblock}
-    
-    \textbf{Insights:}
-    \begin{itemize}
-        \item What happens if $c_n = 0$? Compare it to standard OLS.
-        \item If the rows of $X$ are i.i.d. standard Gaussian random vectors (i.e. $\lambda_{a_n}(X) \in\Omega_{\mathbb{P}}(\sqrt{n})$ \cite{bhatia2015robustregressionhardthresholding}) and $c_n \in o(n/\log(n))$, then $\hat{\beta}_{\text{Tor}}^{n,a_n}$ is consistent.
-    \end{itemize}
-\end{frame}
-
 \begin{frame}[shrink=15]{\normalsize Proofs - DecoR-Tor}
     \begin{block}{Convergence properties of \texttt{DecoR-Tor} (Theorem 6)}
         Let $c_n$ be a known sequence of non-negative natural numbers such that $|G_n| \leq c_n$ and let Assumption 2 in \cite{bhatia2015robustregressionhardthresholding} be satisfied. Assume that for all $\delta > 0$ there exists $\bar{n} \in \mathbb{N}$ such that for all $n \geq \bar{n}$ it holds that

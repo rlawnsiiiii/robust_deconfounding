@@ -51,7 +51,7 @@ Assume $X_{S_{t-1}}^\top X_{S_{t-1}}$ is invertible.
         \Big(
         \left\| (X_{S_{t-1}}^\top X_{S_{t-1}})^{-1} X_{S_{t-1}}^\top \epsilon_{S_{t-1}} \right\|_2 \\
         &\qquad\qquad
-        + \left\| (X_{S_{t-1}}^\top X_{S_{t-1}})^{-1} X_{S_{t-1}}^\top \right\|_{2\to 2}\,
+        + \left\| (X_{S_{t-1}}^\top X_{S_{t-1}})^{-1} X_{S_{t-1}}^\top \right\|_{2}\,
         \|o_{S_{t-1}}\|_2
         \Big)
         + \sqrt{2}\,\|\epsilon_{V_t}\|_2
@@ -80,7 +80,7 @@ Assume $X_{S_{t-1}}^\top X_{S_{t-1}}$ is invertible.
 \end{frame}
 
 \begin{frame}[shrink=7.5]
-    Let $t$ be the final iteration of Torrent, meaning $S_t = S_{t-1}$. 
+    Let $t$ be the final iteration of Torrent, meaning $S_t = S_{t-1}$ {\tiny (proof of this in the backup)}. 
     
     By assumption:
     \vspace{-0.4cm}
@@ -102,7 +102,25 @@ Assume $X_{S_{t-1}}^\top X_{S_{t-1}}$ is invertible.
         \begin{align*}
         \|o_{S_t}\|_2 &\leq \underbrace{\sqrt{2}\|X_{V_t}\|_2 \left\|\left(X_{S_{t}}^\top X_{S_{t}}\right)^{-1} X_{S_{t}}^\top \right\|_2}_{\leq \sqrt{2}\eta} \|o_{S_{t}}\|_2 \\
         &\quad + \sqrt{2}\|X_{V_t}\|_2 \left\|\left(X_{S_{t}}^\top X_{S_{t}}\right)^{-1} X_{S_{t}}^\top \epsilon_{S_{t}} \right\|_2 + \sqrt{2}\|\epsilon_{V_t}\|_2 \\[1ex]
-        &\implies \|o_{S_t}\|_2 \leq \frac{\sqrt{2}\|X_{V_t}\|_2 \left\| (X_{S_t}^\top X_{S_t})^{-1} X_{S_t}^\top \epsilon_{S_t} \right\|_2 + \sqrt{2}\|\epsilon_{V_t}\|_2}{1 - \sqrt{2}\eta}.
+        &\implies \|o_{S_t}\|_2 \leq \frac{\sqrt{2}\|X_{V_t}\|_2 \cdot \text{Error}_\text{OLS} + \sqrt{2}\|\epsilon_{V_t}\|_2}{1 - \sqrt{2}\eta}.
         \end{align*}
     \end{block}
+\end{frame}
+
+\begin{frame}[shrink=7.5]
+    \begin{block}{5. Putting everything together}
+        Using $S_t = S_{t-1}$, Eq. 27, Eq. 30:
+        \vspace{-0.4cm}
+        \begin{align*}
+        \|\hat{\beta}_{\text{Tor}}^t - \beta\|_2 &\leq \left\| (X_{S_{t-1}}^\top X_{S_{t-1}})^{-1} X_{S_{t-1}}^\top \epsilon_{S_{t-1}} \right\|_2 + \left\| (X_{S_{t-1}}^\top X_{S_{t-1}})^{-1} X_{S_{t-1}}^\top \right\|_2 \|o_{S_{t-1}}\|_2 \\
+        &= \text{Err}_{\text{OLS}} + \left\| (X_{S_{t}}^\top X_{S_{t}})^{-1} X_{S_{t}}^\top \right\|_2 \cdot \|o_{S_{t}}\|_2 \\
+        &= \text{Err}_{\text{OLS}} + \frac{1}{\sqrt{\lambda_{\min}((X_s^\top X_s))}} \cdot \|o_{S_{t}}\|_2 \\
+        &\leq \text{Err}_{\text{OLS}} + \frac{\sqrt{2}\|X_{V_t}\|_2 \cdot \text{Error}_\text{OLS} + \sqrt{2}\|\epsilon_{V_t}\|_2}{\sqrt{\lambda_{\min}(X_{S_t}^\top X_{S_t})}(1 - \sqrt{2}\eta)}
+        \end{align*}
+    \end{block}
+    \textbf{Remark:}
+    This deterministic bound can be extended to a probabilistic bound under some Assumptions of noise, i.e. 
+    \begin{exampleblock}{Guarantee of Torrent with sub-Gaussian noise (Corollary 4)}
+        If the rows of $X$ are i.i.d. standard Gaussian random vectors (i.e. $\lambda_{a_n}(X) \in\Omega_{\mathbb{P}}(\sqrt{n})$ \cite{bhatia2015robustregressionhardthresholding}) and $c_n \in o(n/\log(n))$, then $\hat{\beta}_{\text{Tor}}^{n,a_n}$ is consistent.
+    \end{exampleblock}
 \end{frame}
