@@ -76,7 +76,7 @@ ax1.set_ylabel('$CO_2$ (ppm)', fontsize=12)
 
 # Middle: The Predictor (Real Pressure)
 ax2.plot(df_master.index, df_master['pressure'], color='#4A90E2', linewidth=1)
-ax2.set_title('Atmospheric Circulation ($X_t$): Real Munich Surface Pressure', fontsize=14, fontweight='bold')
+ax2.set_title('Predictor ($X_t$): Real Munich Surface Pressure', fontsize=14, fontweight='bold')
 ax2.set_ylabel('Pressure (hPa)', fontsize=12)
 
 # Bottom: The Response (Real Rain)
