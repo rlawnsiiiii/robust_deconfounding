@@ -393,7 +393,7 @@ class OUSparseToXDataGenerator(OUDataGenerator):
         basis = self.get_basis(n)
         k_sparse = self.basis_transform(u, outlier_points, basis, n)
 
-        x = AR_object2.generate_sample(nsample=2 * n)[n:2 * n].reshape(-1, 1) + ex + 10 * k_sparse
+        x = ex + 10 * k_sparse # mentioned setup in future work section of paper
 
         y = x @ self.beta + ey + u  # Dense confounding in y
         return x, y
