@@ -14,24 +14,24 @@ random.seed(SEED)
 data_args = {
     "process_type": "ou_sparse_to_x",
     "basis_type": "cosine",     # "cosine" | "haar"
-    "fraction": 0.25,
-    "beta": np.array([[3.]]),
-    "band": list(range(0, 50))  # list(range(0, 50)) | None
+    "fraction": 0.1,
+    "beta": np.array([[5.]]),
+    "band": list(range(0, 500))  # list(range(0, 50)) | None
 }
 
 method_args = {
-    "a": 0.7,
-    "method": "torrent",        # "torrent" | "bfs"
+    "a": 0.9,
+    "method": "modified_torrent",        # "torrent" | "bfs" | "modified_torrent"
 }
 
-m = 1000
-noise_vars = [0, 1, 4]                                      # [0, 1, 4] | [0, 1]
-num_data = [4 * 2 ** k for k in range(0, 5)] + [1024]       # [4 * 2 ** k for k in range(0, 5)] + [1024] | [8, 12, 16]
+m = 10
+noise_vars = [1, 4]                                      # [0, 1, 4] | [0, 1]
+num_data = [2 ** k for k in range(5, 14)]  # [4 * 2 ** k for k in range(0, 5)] + [1024] | [8, 12, 16]
 
 # ----------------------------------
 # run experiments
 # ----------------------------------
-
+sample_data = None
 for i in range(len(noise_vars)):
     print("Noise Variance: ", noise_vars[i])
     res = {"DecoR": [], "ols": []}
@@ -42,10 +42,19 @@ for i in range(len(noise_vars)):
         for _ in range(m):
             data_values = get_data(n, **data_args, noise_var=noise_vars[i])
 
-            estimates_decor = get_results(**data_values, **method_args)
+            if n == num_data[-1] and i == 0:
+                sample_data = data_values
+
+            estimates_decor = get_results(x=data_values["x"],
+                y=data_values["y"],
+                basis=data_values["basis"],
+                **method_args)
             res["DecoR"][-1].append(np.linalg.norm(estimates_decor - data_args["beta"].T, ord=1))
 
-            estimates_ols = get_results(**data_values, method="ols", a=method_args["a"])
+            estimates_ols = get_results(x=data_values["x"],
+                y=data_values["y"],
+                basis=data_values["basis"],
+                method="ols", a=method_args["a"])
             res["ols"][-1].append(np.linalg.norm(estimates_ols - data_args["beta"].T, ord=1))
 
         # print mean and std of the results
@@ -60,7 +69,7 @@ for i in range(len(noise_vars)):
 # plotting
 # ----------------------------------
 
-titles = {"blp": "Band-Limited", "ou": "Ornstein-Uhlenbeck", "ou_sparse_to_x": "OU (sparse to x, dense to y)"}
+titles = {"blp": "Band-Limited", "ou": "Ornstein-Uhlenbeck", "ou_sparse_to_x": "AR(1) (sparse to x, dense to y)", "blp_sparse_to_x" : "BLP (sparse to x, dense to y)"}
 titles_basis = {"cosine": "", "haar": ", Haar basis"}
 titles_dim = {1: "", 2: ", 2-dimensional"}
 
@@ -80,7 +89,6 @@ def get_handles():
 
         return [point_1, point_2, point_3, point_4, point_5]
     return [point_1, point_2, point_3, point_4]
-
 
 plt.xlabel("number of data points")
 plt.ylabel("mean absolute error")

@@ -113,6 +113,60 @@ class Torrent(BaseRobustRegression):
                 break
         return self
 
+class ModifiedTorrent(BaseRobustRegression):
+    """Modified Torrent algorithm for the Scenario (U sparse towards X and dense towards Y).
+
+    Extends the base regression to implement an iterative process of fitting and refining inliers.
+
+    Attributes:
+        a (float): Proportion of data considered as inliers.
+        max_iter (int): Maximum number of iterations.
+        predicted_inliers (list): List to track inliers over iterations.
+    """
+
+    def __init__(self, a: float, fit_intercept: bool = True, max_iter: int = 100):
+        super().__init__(fit_intercept)
+        if not 0 < a < 1:
+            raise ValueError("'a' must be in the range (0, 1).")
+        self.a = a
+        self.max_iter = max_iter
+        self.predicted_inliers = []
+
+    def fit(self, x: NDArray, y: NDArray) -> Self:
+        """Fit model using an iterative process to determine inliers and refit the model."""
+        n = len(y)
+        y = y.reshape(n, -1)
+
+        self._validate_inputs(x, y)
+        if self.fit_intercept:
+            x_fit = self._add_intercept(x)
+        else:
+            x_fit = x
+
+        an = int(self.a * n)
+        if an == 0:
+            raise ValueError("'a' is too small. Increase 'a' or the number of data points .")
+
+        x_raw = x.reshape(n, -1) if x.ndim == 1 else x
+
+        cross_spectral_scores = np.linalg.norm(x_raw * y, ord=1, axis=1)
+        self.inliers = np.argsort(cross_spectral_scores)[:an].tolist()
+        self.predicted_inliers = [self.inliers]
+
+
+        for _ in range(self.max_iter):
+            self.model = sm.OLS(y[self.inliers], x_fit[self.inliers]).fit()
+            residuals = y - self.model.predict(x_fit).reshape(n, -1)
+            ortho_scores = np.linalg.norm(x_raw * residuals, axis=1)
+
+            old_inliers = self.inliers
+
+            self.inliers = np.argsort(ortho_scores)[:an].tolist()
+            self.predicted_inliers.append(self.inliers)
+
+            if set(self.inliers) == set(old_inliers):
+                break
+        return self
 
 class BFS(BaseRobustRegression):
     """Brute Force Search (BFS) algorithm for regression to find the best subset of inliers.

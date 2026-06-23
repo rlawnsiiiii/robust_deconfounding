@@ -6,10 +6,10 @@ import seaborn as sns
 import scipy as sp
 import pylab
 
-from robust_deconfounding.robust_regression import Torrent, BFS
+from robust_deconfounding.robust_regression import Torrent, BFS, ModifiedTorrent
 from robust_deconfounding.decor import DecoR
 from robust_deconfounding.utils import cosine_basis, haarMatrix, get_funcbasis, get_funcbasis_multivariate
-from synthetic_data import BLPDataGenerator, OUDataGenerator, UniformNonlinearDataGenerator, OUReflectedNonlinearDataGenerator, OUSparseToXDataGenerator
+from synthetic_data import BLPDataGenerator, OUDataGenerator, UniformNonlinearDataGenerator, OUReflectedNonlinearDataGenerator, OUSparseToXDataGenerator, BLPSparseToXDataGenerator
 
 
 def plot_settings():
@@ -71,11 +71,13 @@ def get_results(x: NDArray, y: NDArray, basis: NDArray, a: float, method: str, n
         else:
             x=get_funcbasis_multivariate(x=x, L=L, type=basis_type)
 
-    if method == "torrent" or method == "bfs":
+    if method == "torrent" or method == "bfs" or method == "modified_torrent":
         if method == "torrent":
             algo = Torrent(a=a, fit_intercept=False)
         elif method == "bfs":
             algo = BFS(a=a, fit_intercept=False)
+        elif method == "modified_torrent":
+            algo = ModifiedTorrent(a=a, fit_intercept=False)
 
         algon = DecoR(algo, basis)
         algon.fit(x, y)
@@ -120,6 +122,8 @@ def get_data(n: int, process_type: str, basis_type: str, fraction: float, beta: 
         generator= OUReflectedNonlinearDataGenerator(basis_type=basis_type, beta=beta, noise_var=noise_var, )
     elif process_type=="ou_sparse_to_x":
         generator = OUSparseToXDataGenerator(basis_type=basis_type, beta=beta, noise_var=noise_var)
+    elif process_type=="blp_sparse_to_x":
+        generator = BLPSparseToXDataGenerator(basis_type=basis_type, beta=beta, noise_var=noise_var, band=band)
     else:
         raise ValueError("process_type not implemented")
 
@@ -130,9 +134,23 @@ def get_data(n: int, process_type: str, basis_type: str, fraction: float, beta: 
     else:
         raise ValueError("basis not implemented")
 
-    n_outliers = int(fraction*n)
-    outlier_points = np.array([1]*n_outliers + [0]*(n - n_outliers)).reshape(-1, 1)
-    np.random.shuffle(outlier_points)
+
+    if process_type in ["blp_sparse_to_x"] and band is not None:
+        outlier_points = np.zeros(n)
+        n_outliers = int(fraction * n)
+        valid_band_indices = [b for b in band if b < n]
+        num_to_pick = min(n_outliers, len(valid_band_indices))
+
+        if num_to_pick > 0:
+            chosen_indices = np.random.choice(valid_band_indices, size=num_to_pick, replace=False)
+            for idx in chosen_indices:
+                outlier_points[idx] = 1
+
+        outlier_points = outlier_points.reshape(-1, 1)
+    else:
+        n_outliers = int(fraction*n)
+        outlier_points = np.array([1]*n_outliers + [0]*(n - n_outliers)).reshape(-1, 1)
+        np.random.shuffle(outlier_points)
 
     if beta.shape[0] == 2:
         x, y = generator.generate_data_2_dim(n=n, outlier_points=outlier_points)

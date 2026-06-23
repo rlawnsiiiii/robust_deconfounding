@@ -393,11 +393,39 @@ class OUSparseToXDataGenerator(OUDataGenerator):
         basis = self.get_basis(n)
         k_sparse = self.basis_transform(u, outlier_points, basis, n)
 
-        x = ex + 10 * k_sparse # mentioned setup in future work section of paper
+        x = 5 * k_sparse + ex # mentioned setup in future work section of paper
 
-        y = x @ self.beta + ey + u  # Dense confounding in y
+        y = x @ self.beta + u + ey  # Dense confounding in y
         return x, y
 
+class BLPSparseToXDataGenerator(BLPDataGenerator):
+    def generate_data(self, n: int, outlier_points: NDArray) -> tuple[NDArray, NDArray]:
+        """
+        Generates data from discretized band-limited processes with confounding for the specific scenario "U is sparse towards X and dense towards Y".
+
+        Args:
+            n (int): Number of data points.
+            outlier_points (NDArray): Indicator vector for outlier data points.
+
+        Returns:
+            tuple[NDArray, NDArray]: The generated data (x, y).
+        """
+        eu, ex, ey = self.get_noise_vars(n, [1, 1, 1])
+        band_idx = self.get_band_idx(n)
+
+        basis = self.get_basis(n)
+
+        weights = np.random.normal(0, 1, size=(n, 1))
+        u_band = basis @ (weights * band_idx)
+        u = u_band + eu
+
+        k = self.basis_transform(u, outlier_points, basis, n)
+
+        x = 10 * k + ex
+
+        y = x @ self.beta + u + ey
+
+        return x, y
 def functions_nonlinear(x:NDArray, beta:int):
     """"
     Returns the value of different nonlinear functions evaluated at x where the type can be choosen over the integer beta.
